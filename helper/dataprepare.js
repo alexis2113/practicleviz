@@ -140,9 +140,8 @@ PointsData.forEach(function (e) {
 PointsData.forEach(function (e) { 
   e.coordinates = PointMap.get(e.code);
 })
-var DClaims = CRS.dimension(function (d) { return d.compclaim });
 
-const ClaimsData=DClaims.group().top(Infinity)
+var ClaimsData=Math.random();
 
 console.log("p",PointsData)
 console.log("con",ConnectionData)
