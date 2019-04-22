@@ -647,6 +647,7 @@ var scrollVis = function() {
    */
 
   function showDetails(backwards = false) {
+    d3.selectAll(".Area-layer").call(hide);
     hideAxis();
   }
 
@@ -661,7 +662,7 @@ var scrollVis = function() {
    */
   function showFinal(backwards = false) {
     // ensure the axis to areasogram one
-
+d3.selectAll(".Area-layer").call(hide);
     hideAxis();
   }
 
