@@ -41,15 +41,6 @@
         $('body').find("p.tooltip-active").delay(200).remove();
       });
 
-    $('a[href*="#"]').smoothscroll({
-      duration: 3000,
-      easing: "swing",
-      offset: 0,
-      hash: true,
-      focus: true
-    });
-
-
     window.onscroll = function () {
       scrollsticky();
     };
