@@ -614,6 +614,7 @@ var scrollVis = function() {
   function showBar(backwards = false) {
     console.log("show bar");
     if (backwards) {
+      d3.selectAll(".Area-layer").call(hide);
       d3.selectAll(".Bar-layer").call(show);
     } else {
       d3.selectAll(".map.inner-layer").call(hide);
@@ -634,6 +635,7 @@ var scrollVis = function() {
    */
   function showArea(backwards = false) {
     if (backwards) {
+      d3.selectAll(".Area-layer").call(show);
     } else {
       d3.selectAll(".Area-layer").call(show)
       d3.selectAll(".Bar-layer").call(hide);
