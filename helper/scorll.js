@@ -39,6 +39,7 @@ function scroller() {
     // position. When it is resized
     // call resize.
     d3.select(window)
+      .on("scroll.start",console.log("start scroll"))
       .on("scroll.scroller", position)
       .on("resize.scroller", resize);
 
@@ -94,7 +95,6 @@ function scroller() {
     sectionIndex = Math.min(sections.size() - 1, sectionIndex);
 
     if (currentIndex !== sectionIndex) {
-      // @v4 you now `.call` the dispatch callback
       dispatch.call("active", this, sectionIndex);
       currentIndex = sectionIndex;
     }
@@ -102,7 +102,6 @@ function scroller() {
     var prevIndex = Math.max(sectionIndex - 1, 0);
     var prevTop = sectionPositions[prevIndex];
     var progress = (pos - prevTop) / (sectionPositions[sectionIndex] - prevTop);
-    // @v4 you now `.call` the dispatch callback
     dispatch.call("progress", this, currentIndex, progress);
   }
 
