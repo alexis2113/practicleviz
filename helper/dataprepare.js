@@ -137,16 +137,26 @@ PointsData.forEach(function (e) {
   e.feature = found;
 
 });
-PointsData.forEach(function (e) { 
+PointsData.forEach(function (e) {
   e.coordinates = PointMap.get(e.code);
-})
+});
+const ClaimsData=
+d3.nest()
+  .key(function(d) {
+    return d.fdate;
+  }).rollup(function (leaves) {
+    
+    return {
+      ncaps: d3.sum(leaves, function (g) { return Math.max(0,g.nperps); }),
+      nperps: d3.sum(leaves, function (g) { return Math.max(g.ncaps,0); }),
+      date: leaves[0].date
+    }
+  })
+  
+  .entries(Cdata);
 
-var ClaimsData=Math.random();
-
-console.log("p",PointsData)
-console.log("con",ConnectionData)
 // var ex=barchart().dimension(Gyear).group(Gyear.group(d3.timeYear));
-
+console.log(ClaimsData);
 var trans = d3
   .transition()
   .duration(303)
