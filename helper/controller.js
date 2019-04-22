@@ -1,6 +1,14 @@
 /**
  *
  */
+function hide(selector) {
+  selector.classed("hidden", true);
+  selector.classed("reveal", false);
+}
+function show(selector) {
+  selector.classed("reveal", true);
+  selector.classed("hidden", false);
+}
 
 var width = 900;
 var height = 720;
@@ -10,44 +18,6 @@ var margin = {
   bottom: 30,
   right: 10
 };
-function controlbar(show) { 
-    d3
-    .selectAll(".Bar-layer")
-    .transition()
-    .duration(100)
-    .ease(d3.easeLinear)
-    .attr("opacity", show);
-}
-function controlmap(showbase,showp=0) {
-  d3.selectAll(".border")
-    .transition()
-    .duration(100)
-    .ease(d3.easeLinear)
-    .attr("opacity", showbase);
-    d3.selectAll(".countries-layer")
-      .transition()
-      .duration(100)
-      .ease(d3.easeLinear)
-      .attr("opacity", showbase);
-  
-    d3.selectAll(".Points-layer")
-      .transition()
-      .duration(100)
-      .ease(d3.easeLinear)
-      .attr("opacity", showp);
-  
-     d3.selectAll(".Connections-layer")
-       .transition()
-       .duration(100)
-       .ease(d3.easeLinear)
-       .attr("opacity", 1-showp); 
-
-    }
-
-    
-  
-  
-
 
 // recoshowrding plots indexes
 
@@ -55,7 +25,7 @@ var mapdata = World;
 var bardata = TerroristData.slice(1, 10);
 var connectiondata = ConnectionData;
 var pointsdata = PointsData.slice(0, 10);
-var histData = ClaimsData;
+var areaData = ClaimsData;
 var routedata = d3
   .nest()
   .key(function(d) {
@@ -65,21 +35,7 @@ var routedata = d3
     return { value: leaves.length, start: leaves[0].start, end: leaves[0].end };
   })
   .entries(connectiondata);
-// Updates the visualization
-console.log("r", routedata);
-routedata;
-var arcWidth = d3
-  .scaleLinear()
-  .domain(
-    d3.extent(
-      routedata,
-      d =>
-        function(d) {
-          return d.value;
-        }
-    )
-  )
-  .range([0.1, 7]);
+
 var minColor = "#f0f0f0",
   maxColor = "rgb(8, 48, 107)";
 let mapcolor = function(value) {
@@ -128,11 +84,11 @@ var scrollVis = function() {
   // initiate g
   var g = null;
 
-  var xHistScale = d3
+  var xareasScale = d3
     .scaleLinear()
     .domain([0, 30])
     .range([0, width - 20]);
-  var yHistScale = d3.scaleLinear().range([height, 0]);
+  var yareasScale = d3.scaleLinear().range([height, 0]);
   var coughColorScale = d3
     .scaleLinear()
     .domain([0, 1.0])
@@ -142,9 +98,9 @@ var scrollVis = function() {
     .domain([0, d3.max(bardata, d => d.value)])
     .range([0, width]);
   var xAxisBar = d3.axisBottom().scale(Barwidth);
-  var xAxisHist = d3
+  var xAxisareas = d3
     .axisBottom()
-    .scale(xHistScale)
+    .scale(xareasScale)
     .tickFormat(function(d) {
       return d + " min";
     });
@@ -191,17 +147,17 @@ var scrollVis = function() {
       });
       Barwidth.domain([0, countMax]);
 
-      // get aggregated histogram data
+      // get aggregated areasogram data
 
-      // set histogram's domain
-      var histMax = d3.max(histData, function(d) {
+      // set areasogram's domain
+      var areasMax = d3.max(areaData, function(d) {
         return d.value;
       });
-      yHistScale.domain([0, histMax]);
+      yareasScale.domain([0, areasMax]);
 
-      setupVis(mapdata, connectiondata, pointsdata, bardata, histData);
+      setupVis(mapdata, connectiondata, pointsdata, bardata, areaData);
 
-      setupSections(mapdata, connectiondata, pointsdata, bardata, histData);
+      setupSections(mapdata, connectiondata, pointsdata, bardata, areaData);
     });
   };
 
@@ -214,10 +170,16 @@ var scrollVis = function() {
     //clearing all remaining elements
 
     /** Awesome tooltip idea from Eric Porter https://codepen.io/EricPorter/pen/xdJLaG?editors=1000*/
-
+    d3.select(".inner-layer")
+      .append("path")
+      .datum(topojson.mesh(World, World.objects.countries, (a, b) => a !== b))
+      .attr("d", path)
+      .attr("class", "map border")
+      .attr("stroke", "white")
+      .attr("stroke-width", 2);
     var selection2 = d3
       .select(".countries-layer")
-      .selectAll(".map.countries.removeable.requiretooltip")
+      .selectAll(".map.countries.requiretooltip")
       .data(Feature)
       .attr("message", d => mapmsg(d.name, d.nrecord));
 
@@ -225,65 +187,34 @@ var scrollVis = function() {
       .enter()
       .append("g")
       .attr("message", d => mapmsg(d.name, d.nrecord))
-      .attr("class", "map countries removeable requiretooltip")
+      .attr("class", "map countries requiretooltip")
       .append("path")
       .attr("id", d => d.id)
       .attr("d", path)
       .attr("fill", d => mapcolor(d.nrecord))
       .attr("fill-opacity", 1)
       .attr("stroke-width", 2)
-      .attr("opacity", 0)
-      .transition()
-      .duration(100)
-      .ease(d3.easeLinear)
       .attr("opacity", 1);
-
-    d3.selectAll(".map.border").attr("opacity", 1);
-
-    selection2
-      .transition()
-      .duration(100)
-      .ease(d3.easeLinear)
-      .attr("opacity", 0);
-
-    selection2.exit().remove();
   }
 
   function updatepoints() {
-    var selection = d3
-      .select(".Points-layer")
-      .selectAll(".Points-layer.points")
-      .data(pointsdata)
-      .attr("x", d => projection([d.coordinates[0], d.coordinates[1]])[0] - 16)
-      .attr("y", d => projection([d.coordinates[0], d.coordinates[1]])[1] - 38)
-      .attr("xlink:href", "#pinpoints")
-      .attr("fill", "blue")
-      .attr("fill-opacity", 0.6);
+    const g = d3.select(".Points-layer");
 
-    selection
-      .enter()
+    const ge = g.selectAll(".points.Points-layer").data(pointsdata);
+
+    ge.enter()
       .append("use")
+      .join(ge)
       .attr("class", "points Points-layer")
       .attr("id", d => d.feature.name)
       .attr("x", d => projection([d.coordinates[0], d.coordinates[1]])[0] - 19)
       .attr("y", d => projection([d.coordinates[0], d.coordinates[1]])[1] - 40)
       .attr("xlink:href", "#pinpoints")
       .attr("fill", "blue")
-      .attr("opacity", 0)
-      .transition()
-      .duration(100)
-      .ease(d3.easeLinear)
       .attr("opacity", 1)
-      .attr("fill-opacity", 0.6);
+      .attr("fill-opacity", 1);
 
     // Exit selection: Remove elements without data from the DOM
-    selection
-      .transition()
-      .duration(100)
-      .ease(d3.easeLinear)
-      .attr("opacity", 0);
-
-    selection.exit().remove();
   }
 
   function drawconnection() {
@@ -316,11 +247,7 @@ var scrollVis = function() {
       .attr("stroke", "white")
       .attr("stroke-width", 2)
       .attr("fill", "none")
-      .transition()
-      .duration(10);
-
-    //exit
-    pathArcs.exit().remove();
+      .attr("opacity", 1);
   }
 
   function drawIntro() {
@@ -346,35 +273,46 @@ var scrollVis = function() {
   }
 
   function drawbar() {
-    var margin = 20;
+    var margin = 100;
     var xscale = d3
         .scaleLinear()
         .domain([0, d3.max(bardata, d => d.value)])
-        .range([width - margin, 0]),
+        .range([0, width - margin]),
       yscale = d3
         .scaleBand()
         .domain(d3.range(bardata.length))
         .range([margin, height - margin])
         .round(true)
-        .paddingInner(0.8);
-    var Barheight = (height - 20) / bardata.length;
+        .paddingInner(3);
+    var Barheight = (height - 70) / bardata.length;
     var g = d3
       .select(".Bar-layer")
       .selectAll(".terrorist-bars.Bar-layer")
       .data(bardata);
 
-    g.exit().remove();
+    var yaxis = d3
+      .select(".Bar-layer")
+      .selectAll(".y.bar-axis Bar-layer")
+      .data(bardata);
+    yaxis
+      .enter()
+      .append("g")
+      .attr("transform", (d, i) => {
+        return (
+          "translate(" + `${margin + 400}` + "," + `${yscale(i) - 50}` + ")"
+        );
+      })
+      .attr("class", "y bar-axis Bar-layer")
+      .attr("text-anchor", "start")
+      .append("text")
+      .text(d => d.key);
 
     g.enter()
       .append("rect")
-      .join(g)
       .attr("class", "terrorist-bars Bar-layer")
-      .attr("x", 0)
+      .attr("x", -10)
       .attr("y", (d, i) => yscale(i) - 40)
-      .attr("height", Barheight)
-      .transition()
-      .duration(100)
-      .ease(d3.easeLinear)
+      .attr("height", Barheight - 30)
       .attr("width", d => xscale(d.value));
   }
 
@@ -385,89 +323,167 @@ var scrollVis = function() {
    * @param mapdata - data
    * @param {Array.<Object>} bardata - summarize top terriost,
    *  array of objects with properties [gname,counts]
-   * @param {Array.<Array>} histData - Array with length 1 include filtered data
+   * @param {Array.<Array>} areaData - Array with length 1 include filtered data
    */
   var setupVis = function(
     mapdata,
     connectiondata,
     pointsdata,
     bardata,
-    histData
+    areaData
   ) {
-    console.log("bar", bardata);
-    console.log("hist", histData);
-    console.log("map", mapdata);
-    console.log("points", pointsdata);
-    console.log("con", connectiondata);
     // axis
     g.append("g")
       .attr("class", "x axis")
       .attr("transform", "translate(0," + height + ")")
       .call(xAxisBar);
-    g.select(".x.axis").style("opacity", 0);
 
-    g.append("g").attr("class", "section-Intro Intro-layer");
+    g.append("g").attr("class", " hidden section-Intro Intro-layer");
     //create new group for maps
-    g.append("g").attr("class", "section-map Map-layer");
+    g.append("g").attr("class", " section-map Map-layer");
     const MAPG = d3.select(".Map-layer");
     MAPG.append("g")
       .attr("class", "Map-layer map")
       .attr("id", "Map-outlayer")
       .append("g")
-      .attr("class", "map inner-layer")
-      .append("path")
-      .datum(topojson.mesh(World, World.objects.countries, (a, b) => a !== b))
-      .attr("d", path)
-      .attr("class", "map border")
-      .attr("stroke", "white")
-      .attr("stroke-width", 2);
+      .attr("class", "map inner-layer hidden");
 
     d3.select(".map.inner-layer")
       .append("g")
       .attr("class", "map countries-layer");
     d3.select(".map.inner-layer")
       .append("g")
-      .attr("class", "map Points-layer");
+      .attr("class", "map Points-layer hidden");
     d3.select(".map.inner-layer")
       .append("g")
-      .attr("class", "map Connections-layer");
+      .attr("class", "map Connections-layer hidden");
 
     //
-    g.append("g").attr("class", "section-terrorist Bar-layer").attr("opacity",0);
-
-    g.append("g").attr("class", "section-claims Claims-layer");
+    g.append("g").attr("class", "section-terrorist Bar-layer hidden");
+    g.append("g").attr("class", "section-area Area-layer hidden");
 
     /**
      *
-     * @param histData - datas for drawing bars
+     * @param areaData - datas for drawing bars
      * @param g - datas for drawing bars
      */
-    function drawclaims(histData, g) {
-      var hist = g.selectAll(".hist").data(histData);
-      var histE = hist
+    function drawarea(data = areaData) {
+      const margin = 30;
+
+      var timeExtent = d3.extent(data, function(d) {
+        return d.value.date;
+      });
+      var xScale = d3
+        .scaleTime()
+        .domain(timeExtent)
+        .range([0, width]);
+
+      //extraction of just the rolled up counts from the nested data
+
+      var yScale = d3
+        .scaleLinear()
+        .domain(d3.extent(data,d=>d.value.ncaps))
+        .range([height, 5]);
+      var yScale2 = d3
+        .scaleLinear()
+        .domain(d3.extent(data, d => d.value.nperps))
+        .range([height, 5]);
+
+      var x_axis = d3.axisBottom(xScale);
+      var y_axis = d3
+        .axisLeft(yScale)
+        .tickValues([10, 50, 100, 150, 200, 250, 300]);
+
+      const g = d3.select(".Area-layer");
+
+      const stacks = g
+        .selectAll(".area-stack")
+        .data([""])
         .enter()
-        .append("rect")
-        .attr("class", "hist");
-      hist = hist
-        .merge(histE)
-        .attr("x", function(d) {
-          return xHistScale(d.x0);
+        .append("g")
+        .attr("class", "area-stack");
+        
+
+      //define area generator
+      var area = d3
+        .area()
+        .x(function(d) {
+          return margin + xScale(new Date(d.key));
         })
-        .attr("y", height)
-        .attr("height", 0)
-        .attr(
-          "width",
-          xHistScale(histData[0].x1) - xHistScale(histData[0].x0) - 1
-        )
-        .attr("fill", barColors[0])
-        .attr("opacity", 0);
+        .y1(function(d) {
+          return yScale2(d.value.nperps);
+        })
+
+        .y0(function(d) {
+          return yScale.range()[0];
+        });
+
+      var area2 = d3
+        .area()
+        .curve(d3.curveMonotoneX)
+        .x(function(d) {
+         
+          return margin + xScale(new Date(d.key));
+        })
+        .y1(function(d) {
+         
+          return yScale(d.value.ncaps);
+        })
+
+        .y0(function(d) {
+          return height;
+        });
+
+      stacks
+        .append("g")
+        .attr("class", "area1-perps")
+        .append("path")
+        .datum(data)
+        .attr("d", area)
+        .attr("fill", "blue");
+
+      stacks
+        .append("g")
+        .attr("class", "area2-captured")
+        .append("path")
+        .datum(data)
+        .attr("d", area2)
+        .attr("fill", "black");
+
+      g.selectAll(".circle1")
+        .data(data)
+        .enter()
+        .append("circle")
+        .attr("class", "circle1")
+        .attr("cx", function(d) {
+          return margin + xScale(new Date(d.key));
+        })
+        .attr("cy", function(d) {
+          return yScale(parseInt(d.value.nperps));
+        });
+
+      g.enter()
+        .append("g")
+        .attr("class", "x area-axis")
+        .attr("transform", "translate(" + margin + "," + height + ")")
+        .call(x_axis.tickFormat(d3.timeFormat("%Y-%m")))
+        .selectAll("text")
+        .style("text-anchor", "end");
+
+      g.append("g")
+        .attr("class", "y area-axis")
+        .attr("transform", "translate(" + margin + ",0)")
+        //.attr("transform", "translate(" + margin + ",0)")
+        .call(y_axis);
     }
 
     //
-
-    drawmap();
     updatepoints();
+    drawmap();
+
+    drawconnection();
     drawbar();
+    drawarea();
   };
 
   /**
@@ -477,24 +493,18 @@ var scrollVis = function() {
    * the section's index.
    *
    */
-  var setupSections = function(
-    mapdata,
-    connectiondata,
-    pointsdata,
-    bardata,
-    histData
-  ) {
+  var setupSections = function() {
     // activateFunctions are called each
-    // time the active section changes
+
     activateFunctions[0] = showIntro;
     activateFunctions[1] = showMap;
     activateFunctions[2] = showPoints;
     activateFunctions[3] = showPoints2;
     activateFunctions[4] = showConnect;
     activateFunctions[5] = showBar;
-    activateFunctions[6] = showHist;
-    activateFunctions[7] = showFinal;
-    activateFunctions[8] = showDetail;
+    activateFunctions[6] = showArea;
+    activateFunctions[7] = showDetails;
+    activateFunctions[8] = showFinal;
 
     // updateFunctions are called while
     // in a particular section to update
@@ -522,11 +532,12 @@ var scrollVis = function() {
    * shows: intro title
    *
    */
-  function showIntro() {
-    console.log("begin");
-    
-    controlmap(0,0);
-     controlbar(0,0);
+  function showIntro(backwards = false) {
+    if (backwards) {
+      d3.selectAll(".map.inner-layer").call(hide);
+    } else {
+      d3.selectAll(".intro-layer").call(show);
+    }
   }
 
   /**
@@ -538,12 +549,15 @@ var scrollVis = function() {
    *
    */
 
-  function showMap() {
+  function showMap(backwards = false) {
     hideAxis();
-     
-    controlmap(1, 0);
-    controlbar(0, 0);
-    
+    if (backwards) {
+      d3.selectAll(".Points-layer").call(hide);
+      d3.selectAll(".map.inner-layer").call(show);
+    } else {
+      d3.selectAll(".intro-layer").call(hide);
+      d3.selectAll(".map.inner-layer").call(show);
+    }
   }
 
   /**
@@ -554,118 +568,99 @@ var scrollVis = function() {
    * filler words. also ensures maps
    * are moved back to their place in the Map
    */
-  function showPoints() {
-    hideAxis();
-    controlmap(1, 1);
-    
+  function showPoints(backwards = false) {
+    if (backwards) {
+    } else {
+      d3.selectAll(".Points-layer").call(show);
+    }
   }
-  function showPoints2() {
-    console.log("show points2");
-    controlmap(1, 1);
+  function showPoints2(backwards = false) {
+    if (backwards) {
+      d3.selectAll(".Connections-layer").call(hide);
+      d3.selectAll(".Points-layer").call(show);
+    } else {
+      d3.selectAll(".Points-layer").call(show);
+    }
   }
   /**
-   * showConnect - barchart
+   * showConnect -
    *
    * hides: map Map
-   * hides: histogram
+   * hides: areasogram
    * shows: barchart
    *
    */
-  function showConnect() {
-    
-    
-    drawconnection();
-    controlmap(1);
+  function showConnect(backwards = false) {
     hideAxis();
-    
+    if (backwards) {
+      d3.selectAll(".Bar-layer").call(hide);
+      d3.selectAll(".map.inner-layer").call(show);
+      d3.selectAll(".Connections-layer").call(show);
+    } else {
+      d3.selectAll(".Points-layer").call(hide);
+      d3.selectAll(".Connections-layer").call(show);
+    }
   }
 
   /**
    * showBar - shows the first part
-   *  of the histogram of filler words
+   *  of the areasogram of filler words
    *
    * hides: barchart
-   * hides: last half of histogram
-   * shows: first half of histogram
+   * hides: last half of areasogram
+   * shows: first half of areasogram
    *
    */
-  function showBar() {
+  function showBar(backwards = false) {
     console.log("show bar");
-    
-    controlmap(0);
-    controlbar(1);
+    if (backwards) {
+      d3.selectAll(".Bar-layer").call(show);
+    } else {
+      d3.selectAll(".map.inner-layer").call(hide);
+      d3.selectAll(".Bar-layer").call(show);
+    }
     showAxis(xAxisBar);
   }
 
   /**
-   * showHist - show all histogram
+   * showArea - show all countries
    *
    * hides: cough title and color
    * (previous step is also part of the
-   *  histogram, so we don't have to hide
+   *  areasogram, so we don't have to hide
    *  that)
-   * shows: all histogram bars
+   * shows: all areasogram bars
    *
    */
-  function showHist() {
-    console.log("show histclaim");
-    // ensure the axis to histogram one
-    showAxis(xAxisHist);
-
-    g.selectAll(".cough")
-      .transition()
-      .duration(0)
-      .attr("opacity", 0);
-
-    // named transition to ensure
-    // color change is not clobbered
-    g.selectAll(".hist")
-      .transition("color")
-      .duration(500)
-      .style("fill", "#008080");
-
-    g.selectAll(".hist")
-      .transition()
-      .duration(1200)
-      .attr("y", function(d) {
-        return yHistScale(d.length);
-      })
-      .attr("height", function(d) {
-        return height - yHistScale(d.length);
-      })
-      .style("opacity", 1.0);
+  function showArea(backwards = false) {
+    if (backwards) {
+    } else {
+      d3.selectAll(".Area-layer").call(show)
+      d3.selectAll(".Bar-layer").call(hide);
+    }
+    hideAxis();
   }
   /**
-   * showDetail
+   * showDetails - Deatil page of each country
    */
 
-  function showDetail() {
-    console.log("detail");
+  function showDetails(backwards = false) {
+    hideAxis();
   }
 
   /**
-   * showCough
+   * showFinal
    *
    * hides: nothing
-   * (previous and next sections are histograms
+   * (previous and next sections are areasograms
    *  so we don't have to hide much here)
-   * shows: histogram
+   * shows: areasogram
    *
    */
-  function showFinal() {
-    // ensure the axis to histogram one
-    showAxis(xAxisHist);
+  function showFinal(backwards = false) {
+    // ensure the axis to areasogram one
 
-    g.selectAll(".hist")
-      .transition()
-      .duration(600)
-      .attr("y", function(d) {
-        return yHistScale(d.length);
-      })
-      .attr("height", function(d) {
-        return height - yHistScale(d.length);
-      })
-      .style("opacity", 1.0);
+    hideAxis();
   }
 
   /**
@@ -673,7 +668,7 @@ var scrollVis = function() {
    * display particular xAxis
    *
    * @param axis - the axis to show
-   *  (xAxisHist or xAxisBar)
+   *  (xAxisareas or xAxisBar)
    */
   function showAxis(axis) {
     g.select(".x.axis")
@@ -720,7 +715,7 @@ var scrollVis = function() {
       .duration(0)
       .attr("opacity", progress);
 
-    g.selectAll(".hist")
+    g.selectAll(".areas")
       .transition("cough")
       .duration(0)
       .style("fill", function(d) {
@@ -737,8 +732,9 @@ var scrollVis = function() {
     activeIndex = index;
     var sign = activeIndex - lastIndex < 0 ? -1 : 1;
     var scrolledSections = d3.range(lastIndex + sign, activeIndex + sign, sign);
+
     scrolledSections.forEach(function(i) {
-      activateFunctions[i]();
+      activateFunctions[i](sign < 0 ? true : false);
     });
     lastIndex = activeIndex;
   };
@@ -781,10 +777,20 @@ function display(rawD) {
 
   // setup event handling
   scroll.on("active", function(index) {
-    // highlight current step text
-    d3.selectAll(".step").style("opacity", function(d, i) {
-      return i === index ? 1 : 0.1;
-    });
+    d3.selectAll(".step")
+      .style("opacity", function(d, i) {
+        return i === index ? 1 : 0.1;
+      })
+      .classed("activate", function(d, i) {
+        return i === index ? true : false;
+      });
+    d3.selectAll(".counter")
+      .style("opacity", function(d, i) {
+        return i === index ? 1 : 0.1;
+      })
+      .classed("activate", function(d, i) {
+        return i === index ? true : false;
+      });
 
     // activate current section
     plot.activate(index);
