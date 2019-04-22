@@ -2,7 +2,7 @@
 <html>
 
     <head>
-        <title>Main</title>
+        <section-title>Main</section-title>
         <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
         <link rel="stylesheet" type="text/css" href="css/style.css" />
         <script src="lib/d3v5.min.js"></script>
@@ -29,48 +29,56 @@
                 d="m21.38006,3.5c-7.11323,0 -12.88006,5.76683 -12.88006,12.88006c0,7.11494 12.88006,31.11994 12.88006,31.11994s12.88006,-24.005 12.88006,-31.11994c0,-7.11323 -5.76511,-12.88006 -12.88006,-12.88006zm0,19.03501c-3.39862,0 -6.15495,-2.75462 -6.15495,-6.15495s2.75633,-6.15495 6.15495,-6.15495s6.15495,2.75633 6.15495,6.15495s-2.75633,6.15495 -6.15495,6.15495z" />
         </symbol>
     </svg>
-       
     
-    </svg>
-      
+    <nav class="navigation">    
+        <a href="#Intro" class="navigation-item counter">Intro</a>
+        <a href="#EnterMap" class="navigation-item counter">EnterMap</a>
+        <a href="#showPoints" class="navigation-item counter ">showPoints</a>
+        <a href="#showPoints2" class="navigation-item counter">showPoints2</a>
+        <a href="#Connection" class="navigation-item counter">Connection</a>
+        <a href="#TopTerriost" class="navigation-item counter">TopTerriost</a>
+        <a href="#Summary" class="navigation-item counter">Summary</a>
+        <a href="#Details" class="navigation-item counter">Details</a>
+        <a href="#Final" class="navigation-item counter">End</a>
+    </nav>
         <div class="container">
             
             <div id='graphic'>
-                <div id='sections'>
+                <div id='sections' class=".section-wrapper">
                     <section class="step intro" id="Intro">
-                        <div class="title">Terriost Acctack</div>
-                        analog
+                        <div class="section-title counter">Terriost Acctack</div>
+                        Welcome analog
                     </section>
-                    <section class="step entermap" id="entermap">
-                        <div class="title">Enter the map</div>
+                    <section class="step entermap" id="EnterMap">
+                        <div class="section-title counter">Enter the map</div>
                         enter the map
                     </section>
-                    <section class="step topcountries" id="topcountries">
-                        <div class="title">Top countries</div>
+                    <section class="step showpoints" id="showPoints">
+                        <div class="section-title counter">Top countries</div>
                         show top countries
                     </section>
-                    <section class="step relation">
-                        <div class="title">Connect incidences</div>
-                        show connection
+                    <section class="step showpoints2" id="showPoints2">
+                        <div class="section-title counter">Top countries</div>
+                        show top countries
                     </section>
-                    <section class="step topterriost">
-                        <div class="title">Top responsible Terriost</div>
-                        blahblah
+                    <section class="step connection" id="Connection">
+                        <div class="section-title counter">How attacks related</div>
+                        show relation
                     </section>
-                    <section class="step howclaim">
-                        <div class="title">How they claim acctack</div>
-                        blahblah
+                    <section class="step topterriost" id="TopTerriost">
+                        <div class="section-title counter">Top Terriost</div>
+                        Top Terriost
                     </section>
-                    <section class="step">
-                        <div class="title">More Details</div>
-                        blahblah
+                    <section class="step summary" id="Summay">
+                        <div class="section-title counter">Summay</div>
+                        Summary Maps
                     </section>
-                    <section class="step">
-                        <div class="title">The Cough Effect</div>
-                        blahblah
+                    <section class="step details" id="Details">
+                        <div class="section-title counter">Details</div>
+                        Countries details
                     </section>
-                    <section class="step">
-                        <div class="title"></div>
+                    <section class="step final" id="Final">
+                        <div class="section-title counter">Final</div>
                         blahblah
                     </section>
                 </div>
@@ -84,10 +92,11 @@
 
         
         <script src="tilechart.js"></script>
-       
+    <script src="lib/jquery3.3.1.min.js"></script>
+       <script src="lib/jquery.smoothscroll.min.js"></script>
         <script src="helper/scorll.js"></script>
         <script src="helper/controller.js"></script>
-         <script src="lib/jquery3.3.1.min.js"></script>
+         
         <script src="eventlistener.js"></script>
     </body>
 
