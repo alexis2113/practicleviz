@@ -1,5 +1,5 @@
 body{
-    background: #262626;
+    background: #1f1919f5;
 }
 
 
@@ -27,26 +27,6 @@ body{
     color: rgb(236, 229, 229);
 }
 
-.Scroll-progress-indicator {
-    will-change: opacity, transform;
-    transition: all 0.5s;
-    left: 0px;
-    border-radius: 2px;
-    position: absolute;
-    top: 50%;
-    opacity: 1;
-    color: #000;
-    padding: 2em;
-    -webkit-transform: translateX(200%) translateY(-50%);
-    transform: translateX(200%) translateY(-50%);
-    background-color: rgb(231, 157, 157);
-}
-
-.Scroll-progress-indicator.visible {
-    -webkit-transform: translateX(-100%) translateY(-50%);
-    transform: translateX(-100%) translateY(-50%);
-    opacity: 1;
-}
 
 .container {
     width: 1190px;
@@ -56,47 +36,51 @@ body{
     padding-top: 40px;
 }
 .hidden>*{
+  
+   
     opacity: 0;
 }
 .reveal{
+  
+  
     opacity: 1;
 }
 
 #sections{
 position: relative;
 width: 250px;
-top: 0px;
+top: 10px;
 z-index: 90;
 padding-bottom: 200px;
 }
 section {
     display: inline-block;
     width: 250px;
-    top: 200px;
-    z-index: 90;
+    top: 100px;
+    z-index: 900;
     padding-bottom: 300px;
     justify-content: left;
     align-items: middle;
      color: rgb(77, 31, 31);
       font-size: 2rem;
-    height: 1000px;
+    height: 900px;
        
 }
 
 .step {
-    margin-bottom: 0px;
+    margin-bottom: 100px;
     font-family: "TiemposTextWeb-Regular", "Georgia";
     font-size: 16px;
     line-height: 23px;
-    color: #767678;
+    color: #f2f2fa;
 }
 
 #sections .section-title {
     font-family: Arial, Helvetica, "san-serif";
     font-size: 16px;
     font-weight: bold;
-    margin-bottom: 2px;
-    color: #aa9898;
+    margin-bottom: 20px;
+    color: #f7eaea;
     line-height: 1.2em;
 }
 
@@ -109,7 +93,7 @@ section {
     position: fixed;
     top: 60px;
     z-index: 1;
-    left: 600px;
+    left: 500px;
     /* height: 600px; */
     /* width: 600px; */
     /* background-color: #ddd; */
@@ -137,20 +121,18 @@ section {
     font-weight: bold;
 }
 
-.cough-arrow {
-    stroke: #000;
-    stroke-width: 4px;
 
-}
 .activate{
     color: antiquewhite;
+    animation: activate 15s linear
 }
 .Connections-layer[class=reveal]>.routes {
     stroke-dasharray: 1000;
     stroke-dashoffset: 1000;
-    animation: dash 10s linear alternate;
+    animation: dash 20s linear alternate infinite;
 }
 .sticky,
+.Detail-title
 .active[class=section-title] {
     position: fixed;
     top: 300;
@@ -168,4 +150,24 @@ section {
     to {
         stroke-dashoffset: 0;
     }
+}
+
+@keyframes activate{
+from{
+    opacity: 0;
+}to{
+
+    opacity: 1;
+}
+
+
+}
+
+test{
+    color: white;
+    opacity: 1;
+}
+#Final{
+   height:50px;
+
 }
