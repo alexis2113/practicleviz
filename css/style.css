@@ -1,7 +1,7 @@
 body{
     background: #1f1919f5;
     color: #fff !important;
-    fill: #fff !important;
+    
 }
 
 
@@ -165,10 +165,10 @@ from{
 
 }
 
-.y,.x{
+text{
     color: white;
     opacity: 1;
-    fill: #fff;
+    fill: #fff !important;
 }
 #Final{
    height:50px;
