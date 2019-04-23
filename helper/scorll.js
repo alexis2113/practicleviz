@@ -1,18 +1,11 @@
-/**
- * scroller - handles the details
- * of figuring out which section
- * the user is currently scrolled
- * to.
- *
- */
+
+ 
 function scroller() {
   var container = d3.select("body");
   // event dispatcher
   var dispatch = d3.dispatch("active", "progress");
 
-  // d3 selection of all the
-  // text sections that will
-  // be scrolled through
+
   var sections = null;
 
   // array that will hold the
@@ -24,28 +17,22 @@ function scroller() {
   var containerStart = 0;
 
   /**
-   * scroll - constructor function.
-   * Sets up scroller to monitor
-   * scrolling of els selection.
+
    *
    * @param els - d3 selection of
-   *  elements that will be scrolled
-   *  through by user.
+ 
    */
   function scroll(els) {
     sections = els;
 
-    // when window is scrolled call
-    // position. When it is resized
-    // call resize.
+
     d3.select(window)
       .on("scroll.start",console.log("start scroll"))
       .on("scroll.scroller", position)
       .on("resize.scroller", resize);
 
     // manually call resize
-    // initially to setup
-    // scroller.
+
     resize();
 
     // hack to get position

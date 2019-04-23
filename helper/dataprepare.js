@@ -20,6 +20,59 @@ var DATA = d3
   })
   .entries(Major);
 DATA = new Map(DATA.map(d => [d.key, d.values]));
+targtype1 = [
+  "Business",
+  "Government (General)",
+  "Police",
+  "Military",
+  "Abortion Related",
+  "Airports & Aircraft",
+  "Government (Diplomatic)",
+  "Educational Institution",
+  "Food or Water Supply",
+  "Journalists & Media",
+  "Maritime",
+  "NGO",
+  "Other",
+  "Private Citizens & Property",
+  "Religious Figures/Institutions",
+  "Telecommunication",
+  "Terrorists/Non-State Militia",
+  "Tourists",
+  "Transportation",
+  "Unknown",
+  "Utilities",
+  "Violent Political Party"
+];
+TargetMap = new Map(targtype1.map((d, i) => [i + 1, d]));
+attacktype1 = [
+  "Assassination",
+  "Armed Assault",
+  "Bombing/Explosion",
+  "Barricade Incident",
+  "Hijacking",
+  "Hostage Taking (Kidnapping)",
+  "Facility/Infrastructure Attack",
+  "Unarmed Assault"
+];
+AttackMap = new Map(
+  attacktype1.map((d, i) => [[1, 2, 3, 5, 4, 6, 7, 8][i], d])
+);
+weaptype1 = [
+  "Biological",
+  "Chemical",
+  "Radiological",
+  "Firearms",
+  "Explosives",
+  "Grenade",
+  "Incendiary",
+  "Melee",
+  "Vehicle "
+];
+WeaponMap = new Map(
+  weaptype1.map((d, i) => [[1, 2, 3, 5, 6, 7, 8, 9, 10][i], d])
+);
+
 const Percountry = new Map(
   d3
     .nest()
@@ -41,24 +94,22 @@ Feature.forEach(e => {
   e.nrecord = Percountry.get(e.id) ? Percountry.get(e.id).length : 0;
   return e;
 });
-const ConnectionData = RELATE.map(function (e) { 
+const ConnectionData = RELATE.map(function(e) {
   let temp = e.origin.toString().padStart(3, "0");
   let temp2 = e.destination.toString().padStart(3, "0");
   e.Corigin = CodeMap.get(temp);
   e.Cdest = CodeMap.get(temp2);
   e.start = PointMap.get(temp);
   e.end = PointMap.get(temp2);
-  
-  return e;
 
-})
+  return e;
+});
 
 let Cdata = Array.from({ length: Major.length }, () => {
   return {
     word: 0
   };
 });
-
 
 function parsedata(v) {
   var reg = /[-]{0,1}[\d]*[\.]{0,1}[\d]+/g;
@@ -114,8 +165,8 @@ var Dgname = CRS.dimension(function(d) {
   return d.gname;
 });
 TerroristData = Dgname.group().top(Infinity);
-var PointsData=
-d3.nest()
+var PointsData = d3
+  .nest()
   .key(function(d) {
     return d.country;
   })
@@ -124,40 +175,117 @@ d3.nest()
   })
   .entries(Cdata);
 PointsData.sort(function(a, b) {
-        return  b.value-a.value;
+  return b.value - a.value;
 });
-      
-PointsData.forEach(function (e) {
+
+PointsData.forEach(function(e) {
   e.code = e.key.padStart(3, "0");
 });
-PointsData.forEach(function (e) {
-  let found = Feature.find(function (element) {
+PointsData.forEach(function(e) {
+  let found = Feature.find(function(element) {
     return element.id == e.code;
   });
   e.feature = found;
-
 });
-PointsData.forEach(function (e) {
+PointsData.forEach(function(e) {
   e.coordinates = PointMap.get(e.code);
 });
-const ClaimsData=
-d3.nest()
+
+const misClaimsData = d3
+  .nest()
+  .key(function(d) {
+    return (d.nperps >= 0) & (d.nperpcap >= 0) ? d.fdate : null;
+  })
+  .rollup(function(leaves) {
+    return leaves
+      ? {
+          ncaps: d3.sum(leaves, function(g) {
+            return Math.max(0, g.nperps);
+          }),
+          nperps: d3.sum(leaves, function(g) {
+            return Math.max(g.ncaps, 0);
+          }),
+          date: leaves[0].date
+        }
+      : null;
+  })
+
+  .entries(Cdata);
+console.log(misClaimsData);
+const ClaimsData = d3
+  .nest()
   .key(function(d) {
     return d.fdate;
-  }).rollup(function (leaves) {
-    
-    return {
-      ncaps: d3.sum(leaves, function (g) { return Math.max(0,g.nperps); }),
-      nperps: d3.sum(leaves, function (g) { return Math.max(g.ncaps,0); }),
-      date: leaves[0].date
-    }
   })
-  
+  .rollup(function(leaves) {
+    return {
+      ncaps: d3.sum(leaves, function(g) {
+        return Math.max(0, g.nperps);
+      }),
+      nperps: d3.sum(leaves, function(g) {
+        return Math.max(g.ncaps, 0);
+      }),
+      date: leaves[0].date
+    };
+  })
+
   .entries(Cdata);
 
+
+function REDUCE(data) {
+  var ndx = crossfilter(data);
+  var monthlyattack = ndx.dimension(function (d) {
+    return [d["fdate"], d["attack"],d["target"]];
+  });
+
+  var mattackgroup = monthlyattack.group().reduceSum(function (d) {
+    return 1;
+  });
+
+  var monthkey = function (d) {
+    return d.key[0];
+  };
+
+  var attackkey = function (d) {
+    return d.key[1];
+  };
+  
+var targetkey = function(d) {
+  return d.key[2];
+};
+  
+
+  var sumkey = function (d) {
+    return d.value;
+  };
+
+  var filteredData = mattackgroup.all();
+  
+  var attackname = d3.set(filteredData.map(attackkey)).values();
+  var monthkey = d3.set(filteredData.map(monthkey)).values();
+  var targetall= d3.max(filteredData.map(targetkey));
+  
+
+  
+  
+  return filteredData;
+  console.log(filteredData)
+}
 // var ex=barchart().dimension(Gyear).group(Gyear.group(d3.timeYear));
-console.log(ClaimsData);
+
+
+
 var trans = d3
   .transition()
   .duration(303)
   .ease(d3.easeLinear);
+
+var DetailData;
+
+function Dnation(code) {
+  return Cdata.filter(function(d) {
+    return d.country == code;
+  });
+}
+
+

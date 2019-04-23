@@ -47,7 +47,7 @@ let mapcolor = function(value) {
 };
 function mapmsg(ctr, rec) {
   return (
-    "<div class='tooltipcontent'><li><span>Country : " +
+    "<div class='tooltipcontent'><li><span>areaData : " +
     ctr +
     "</span></li><li><span>Records : " +
     rec +
@@ -325,7 +325,7 @@ var scrollVis = function() {
    *  array of objects with properties [gname,counts]
    * @param {Array.<Array>} areaData - Array with length 1 include filtered data
    */
-  var setupVis = function(
+  var setupVis = function (
     mapdata,
     connectiondata,
     pointsdata,
@@ -361,121 +361,509 @@ var scrollVis = function() {
     //
     g.append("g").attr("class", "section-terrorist Bar-layer hidden");
     g.append("g").attr("class", "section-area Area-layer hidden");
+    g.append("g").attr("class", "section-area Detail-layer hidden");
 
     /**
      *
      * @param areaData - datas for drawing bars
      * @param g - datas for drawing bars
      */
-    function drawarea(data = areaData) {
-      const margin = 30;
+    function drawarea(data = Dnation("4")) {
+    
+      var data = Array(3);
+      rdata = d3.nest().entries(areaData);
+      newdata = d3
+        .nest()
+        .key(function (d) {
+          return d.fdate;
+        })
+        .rollup(function (leaves) {
+          return {
+            nkill: d3.sum(leaves, function (l) {
+              return Math.max(+l.nkill, 0);
+            }),
+            nhost: d3.sum(leaves, function (l) {
+              return Math.max(+l.nhostkid, 0);
+            }),
+            nwound: d3.sum(leaves, function (l) {
+              return Math.max(+l.nwound, 0);
+            })
+          };
+        })
+        .entries(rdata);
+      data[0] = {
+        key: "nkill",
+        value: d3.sum(newdata, function (e) {
+          return e.value.nkill;
+        })
+      };
+      data[1] = {
+        key: "hostkip",
+        value: d3.sum(newdata, function (e) {
+          return e.value.nhostkid;
+        })
+      };
+      data[2] = {
+        key: "wound",
+        value: d3.sum(newdata, function (e) {
+          return e.value.nwound;
+        })
+      };
 
-      var timeExtent = d3.extent(data, function(d) {
-        return d.value.date;
-      });
-      var xScale = d3
-        .scaleTime()
-        .domain(timeExtent)
-        .range([0, width]);
+      const maxVlue = d3.sum(data, d => d.value);
+      var margin = { top: 10, left: 10, right: 10, bottom: 10 };
+      var config = {
+        width: 300,
+        height: 300,
+        levels: 5,
+        labelFactor: 1.25,
+        opacity: 0.5,
+        dotRadius: 7,
+        circlecolor: "blue",
+        strokeWidth: 2,
+        format: d3.format(".0%"),
+        color: d3.scaleOrdinal(d3.schemeCategory10)
+      };
+      var types = data.map(d => d.key),
+        total = types.length,
+        radius = Math.min(
+          -margin.left + config.width / 2,
+          -margin.top + config.height / 2
+        ),
+        Format = d3.format(config.format),
+        angleSlice = (Math.PI * 2) / 3;
 
-      //extraction of just the rolled up counts from the nested data
+      var svg = d3
+        .select(".Area-layer")
+        .attr("height", config.height)
+        .attr("width", config.width);
+      var filter = svg
+        .append("defs")
+        .append("filter")
+        .attr("id", "glow"),
+        feGaussianBlur = filter
+          .append("feGaussianBlur")
+          .attr("stdDeviation", "2.5")
+          .attr("result", "coloredBlur"),
+        feMerge = filter.append("feMerge"),
+        feMergeNode_1 = feMerge.append("feMergeNode").attr("in", "coloredBlur"),
+        feMergeNode_2 = feMerge.append("feMergeNode").attr("in", "SourceGraphic");
+      let parseTime = d3.timeParse("%b,%Y");
 
-      var yScale = d3
-        .scaleLinear()
-        .domain(d3.extent(data,d=>d.value.ncaps))
-        .range([height, 5]);
-      var yScale2 = d3
-        .scaleLinear()
-        .domain(d3.extent(data, d => d.value.nperps))
-        .range([height, 5]);
-
-      var x_axis = d3.axisBottom(xScale);
-      var y_axis = d3
-        .axisLeft(yScale)
-        .tickValues([10, 50, 100, 150, 200, 250, 300]);
-
-      const g = d3.select(".Area-layer");
-
-      const stacks = g
-        .selectAll(".area-stack")
-        .data([""])
-        .enter()
+      var circleaxis = svg
         .append("g")
-        .attr("class", "area-stack");
-        
+        .attr("class", "radaraxis")
+        .attr("transform", "translate(" + 0 + "," + 0 + ")");
 
-      //define area generator
-      var area = d3
-        .area()
-        .x(function(d) {
-          return margin + xScale(new Date(d.key));
+      circleaxis
+        .selectAll(".levels")
+        .data(d3.range(5))
+        .enter()
+        .append("circle")
+        .attr("class", "innerCircle")
+        .attr("cx", config.width / 2 + margin.left)
+        .attr("cy", config.height / 2 + margin.top)
+        .attr("r", function (d, i) {
+          return ((i + 1) * radius) / 5;
         })
-        .y1(function(d) {
-          return yScale2(d.value.nperps);
-        })
+        .attr("stroke", "blue")
+        .attr("fill", "none")
+        .attr("fill-opacity", 0.2)
+        .attr("stroke-opacity", 0.5)
+        .attr("filter", "url(#glow)");
 
-        .y0(function(d) {
-          return yScale.range()[0];
+      circleaxis
+        .selectAll(".axisLabel")
+        .data(d3.range(5))
+        .enter()
+        .append("text")
+        .attr("class", "axisLabel")
+        .attr(
+          "transform",
+          "translate(" +
+          (margin.left + config.width / 2) +
+          "," +
+          (margin.top + config.width / 2) +
+          ")"
+        )
+        .attr("x", margin.left)
+        .attr("y", d => -margin.top - (d * radius) / 5)
+        .attr("dy", "0.4em")
+        .style("font-size", "10px")
+        .attr("fill", "#737373")
+        .text(function (d) {
+          return d == 0 ? "" : config.format(d / 4);
         });
 
-      var area2 = d3
+      var Areaaxis = svg
+        .append("g")
+        .attr("class", "ray axis")
+        .attr(
+          "transform",
+          "translate(" +
+          (margin.left + config.width / 2) +
+          "," +
+          (margin.top + config.width / 2) +
+          ")"
+        )
+        .selectAll("g")
+        .data(d3.range(0, 360, 120))
+        .enter()
+        .append("g")
+        .attr("transform", function (d) {
+          return "rotate(" + `${0}` + ")";
+        });
+
+      Areaaxis.append("line")
+        .attr("x1", 0)
+        .attr("y1", 0)
+        .attr("x2", (d, i) => 0 + radius * Math.sin(angleSlice * (i + 1)))
+        .attr("y2", (d, i) => 0 + radius * Math.cos(angleSlice * (i + 1)))
+        .attr("stroke", "black");
+
+      Areaaxis.append("text")
+        .attr("dominant-baseline", "central")
+        .attr("x", (d, i) => 0 + radius * Math.sin(angleSlice * (i + 1)))
+        .attr("y", (d, i) => 0 + radius * Math.cos(angleSlice * (i + 1)))
+        .attr("text-anchor", "middle")
+        .text(function (d, i) {
+          return ["Killed", "Hostages", "Wounded"][i];
+        });
+      //Append the lines
+
+      angleSlice = (Math.PI * 2) / 3;
+
+      let rscale = d3
+        .scaleLinear()
+        .domain([0, maxVlue])
+        .range([0, config.width / 2]);
+      const rline = d3
+        .lineRadial()
+        .radius(function (d) {
+          return rscale(d.value);
+        })
+        .angle(function (d, i) {
+          return Math.PI / 3 + (i + 1) * angleSlice;
+        });
+
+      let msg = data.map(function (e) {
+        return "<li>" + e.key + " : " + e.value + "</li>";
+      });
+
+      const ra = svg
+        .append("g")
+        .attr("class", "radar-area")
+        .attr(
+          "transform",
+          "translate(" +
+          (config.width / 2 + margin.left) +
+          "," +
+          (margin.top + config.height / 2) +
+          ")"
+        );
+      ra.selectAll("path")
+        .data([data])
+        .enter()
+        .append("path")
+        .attr("class", "radarArea requiretooltip")
+        .attr(
+          "transform",
+          "translate(" +
+          (margin.left + config.width / 2) +
+          "," +
+          (margin.top + config.height / 2) +
+          ")"
+        )
+        .attr("d", rline(data))
+        .attr("fill", "red")
+        .attr("transform", function (d, i) {
+          return "rotate(" + `${0}` + ")";
+        })
+        .attr("opacity", 0.2)
+        .attr("stroke", "black")
+        .attr("stroke-width", 2)
+        .attr("message", msg);
+    }
+  
+  
+   
+    
+      
+   
+    function barsgroup(data) {
+      function prepareBD(Country) {
+        formattime = d3.timeFormat("%b,%Y");
+        let parseTime = d3.timeParse("%b,%Y");
+        let parseYear = d3.timeParse("%Y");
+        let crs = crossfilter(Country);
+        let Ddate = crs.dimension(function(d) {
+          return d.fdate;
+        });
+        let Dyear = crs.dimension(function(d) {
+          return d.year;
+        });
+        groupbyyear = Dyear.group().all();
+        let newdataate = d3.nest().key(function(d) {
+          return d.fdate;
+        });
+        let readydata = newdataate.entries(Ddate.top(Infinity));
+
+        let g1data = readydata.map(function(e) {
+          e.counts = 0;
+          e.countf = 0;
+          e.values.forEach(function(l) {
+            if (l.success == "Yes") {
+              e.counts = e.counts + 1;
+            } else if (l.success == "NO") {
+              e.countf = e.countf + 1;
+            }
+          });
+
+          return e;
+        });
+        g1data.forEach(element => {
+          element.key = parseTime(element.key);
+        });
+
+        //sort date anewdata parse
+
+        return [groupbyyear, g1data];
+      }
+
+      data = prepareBD(data);
+
+      const data1 = data[0];
+      const data2 = data[1];
+      let margin = {
+          top: 30,
+          right: 20,
+          bottom: 20,
+          left: 20
+        },
+        offset = {
+          top: 330,
+          bottom: 330
+        },
+        width = 900,
+        gap = 160,
+        height = 800,
+        BG = {};
+      const parseTime = d3.timeParse("%b,%Y");
+      const parseYear = d3.timeParse("%Y");
+      let Brush = d3
+        .brushX()
+        .extent([[0, 0], [width, height]])
+        .handleSize(8);
+
+      let mgb = d3
+        .select(".msg")
+        .append("p")
+        .attr("class", "title a")
+        .text("message");
+
+      var X1 = d3.scaleTime().range([0, width]),
+        Y = d3
+          .scaleLinear()
+          .range([height - offset.top - offset.bottom - margin.bottom, 0]),
+        XAxis = d3.axisBottom(X1),
+        YAxis = d3.axisLeft(Y);
+      pathx = d3
         .area()
         .curve(d3.curveMonotoneX)
         .x(function(d) {
-         
-          return margin + xScale(new Date(d.key));
+          return X1(parseYear(d.key));
         })
+        .y0(height - offset.top - offset.bottom - margin.bottom)
         .y1(function(d) {
-         
-          return yScale(d.value.ncaps);
-        })
-
-        .y0(function(d) {
-          return height;
+          return Y(d.value);
         });
 
-      stacks
-        .append("g")
-        .attr("class", "area1-perps")
-        .append("path")
-        .datum(data)
-        .attr("d", area)
-        .attr("fill", "blue");
+      let xb = d3
+        .scaleTime()
+        .range([0, width])
+        .nice();
 
-      stacks
-        .append("g")
-        .attr("class", "area2-captured")
-        .append("path")
-        .datum(data)
-        .attr("d", area2)
-        .attr("fill", "black");
+      let yTcale = d3.scaleLinear().range([offset.top, margin.top]);
+      let yBcale = d3.scaleLinear().range([offset.bottom, margin.bottom]);
 
-      g.selectAll(".circle1")
-        .data(data)
-        .enter()
-        .append("circle")
-        .attr("class", "circle1")
-        .attr("cx", function(d) {
-          return margin + xScale(new Date(d.key));
+      const svg = d3
+        .select(".Detail-layer")
+        .attr("transform", `translate( 100 , ${margin.top})`);
+
+      const central = svg
+        .append("g")
+        .attr("class", "central")
+        .attr("transform", "translate(" + 0 + "," + margin.top + ")");
+      central
+        .append("g")
+        .append("defs")
+        .append("clipPath")
+        .attr("id", "Clip")
+        .append("rect")
+        .attr("width", width)
+        .attr("fill", "grey")
+        .attr("height", gap - margin.top - margin.bottom / 2)
+        .attr("x", 0)
+        .attr("y", offset.bottom - margin.bottom);
+
+      X1.domain(
+        d3.extent(data1, function(d) {
+          return parseYear(d.key);
         })
-        .attr("cy", function(d) {
-          return yScale(parseInt(d.value.nperps));
-        });
+      );
+      Y.domain([
+        0,
+        d3.max(data1, function(d) {
+          return d.value;
+        })
+      ]);
 
-      g.enter()
+      //data involve
+
+      central
         .append("g")
-        .attr("class", "x area-axis")
-        .attr("transform", "translate(" + margin + "," + height + ")")
-        .call(x_axis.tickFormat(d3.timeFormat("%Y-%m")))
-        .selectAll("text")
-        .style("text-anchor", "end");
+        .attr("class", "central axis axis--x")
+        .attr(
+          "transform",
+          "translate(" +
+            margin.right / 2 +
+            "," +
+            `${height - offset.bottom - margin.bottom - margin.bottom}` +
+            ")"
+        )
+        .call(XAxis);
 
-      g.append("g")
-        .attr("class", "y area-axis")
-        .attr("transform", "translate(" + margin + ",0)")
-        //.attr("transform", "translate(" + margin + ",0)")
-        .call(y_axis);
+      central
+        .append("g")
+        .attr("class", "central axis axis--y")
+        .attr(
+          "transform",
+          "translate(" + 0 + "," + `${offset.bottom - margin.bottom-10}` + ")"
+        )
+        .call(YAxis);
+
+      central
+        .append("g")
+        .attr("class", "area layer")
+        .attr(
+          "transform",
+          "translate(" + 0 + "," + `${offset.bottom - margin.bottom}` + ")"
+        )
+        .append("path")
+        .datum(data1)
+        .attr("d", pathx);
+
+      central
+        .append("g")
+        .attr("class", "central brush")
+        .attr("clip-path", "url(#Clip)")
+        .call(Brush)
+        .call(Brush.move, [0, width]);
+
+      yTcale.domain(d3.extent(data2.map(d => d.counts))).clamp(true);
+      yBcale.domain(d3.extent(data2.map(d => d.countf))).clamp(true);
+
+      svg.append("g").attr("class", "uplayer");
+      const upgroup = d3.select(".uplayer");
+      svg
+        .append("g")
+        .attr("class", "downlayer")
+        .attr(
+          "transform",
+          "translate(" +
+            0 +
+            "," +
+            `${margin.bottom + gap - margin.top}` +
+            ")"
+        );
+      const downgroup = d3.select(".downlayer");
+
+      BG.updatebars = function(data, barwidth) {
+        const bars = upgroup.selectAll(".upbars").data(data, function(d) {
+          return d;
+        });
+        bars.exit().remove();
+
+        bars
+          .enter()
+          .append("rect")
+          .join(bars)
+          .attr("class", "upbars")
+          .attr("x", (d, i) => xb(d.key))
+          .attr("y", d => yTcale(d.counts))
+          .attr("width", barwidth)
+          .transition(trans)
+          .attr("height", d => yTcale(0) - yTcale(d.counts));
+
+        const upaxis = upgroup.selectAll(".xaxis--up").data([""]);
+        upaxis.exit().remove();
+        upaxis
+          .enter()
+          .append("g")
+          .merge(upaxis)
+          .attr("transform", "translate(" + 0 + "," + `${offset.top +10}`+ ")")
+          .attr("class", "xaxis--up")
+          .call(d3.axisBottom(xb));
+
+        const bars2 = downgroup
+          .selectAll(".downbars")
+          .data(data, function(d) {
+            return d;
+          });
+        bars2.exit().remove();
+
+        bars2
+          .enter()
+          .append("rect")
+          .join(bars2)
+          .attr("class", "downbars")
+          .attr("x", (d, i) => xb(d.key))
+          .attr("y", d => yBcale(0))
+          .attr("width", barwidth)
+          .transition(trans)
+          .attr("height", d => yBcale(0) - yBcale(d.countf));
+      };
+
+      xb.domain(d3.extent(data2.map(d => d.key)));
+      let barwidth =
+        (width - margin.right / 2) / xb.ticks(d3.timeMonth.every(1)).length;
+
+      BG.updatebars(data2, barwidth);
+
+      Brush.on("start", function() {
+        mgb.text("start");
+        extent = d3.event.selection;
+        (transform1 = X1.invert(extent[0])),
+          (transform2 = X1.invert(extent[1])),
+          (t1 = d3.timeMonth.floor(transform1));
+        t2 = d3.timeMonth.ceil(transform2);
+
+        //
+      });
+      Brush.on("brush", function() {
+        mgb.text("brushing");
+        extent = d3.event.selection;
+        (transform1 = X1.invert(extent[0])),
+          (transform2 = X1.invert(extent[1])),
+          (t1 = d3.timeMonth.floor(transform1));
+        t2 = d3.timeMonth.ceil(transform2);
+        xb.domain([t1, t2])
+          .range([0, width])
+          .clamp(true);
+        stepwidth =
+          (width - margin.right / 2) / d3.timeMonth.range(t1, t2, 1).length;
+        barwidth = stepwidth < 1000 && stepwidth > 0 ? stepwidth : 0;
+        BG.updatebars(data2, barwidth);
+      });
+      Brush.on("end", function() {});
+
+      return BG;
     }
+
+    
+
+      
+    
 
     //
     updatepoints();
@@ -483,8 +871,15 @@ var scrollVis = function() {
 
     drawconnection();
     drawbar();
-    drawarea();
-  };
+  
+    
+    drawarea(Dnation("4"));
+
+    barsgroup(Dnation("4"));
+  }
+
+  
+
 
   /**
    * setupSections - each section is activated
@@ -533,6 +928,7 @@ var scrollVis = function() {
    *
    */
   function showIntro(backwards = false) {
+    hideAxis()
     if (backwards) {
       d3.selectAll(".map.inner-layer").call(hide);
     } else {
@@ -636,8 +1032,9 @@ var scrollVis = function() {
   function showArea(backwards = false) {
     if (backwards) {
       d3.selectAll(".Area-layer").call(show);
+      d3.selectAll(".Detail-layer").call(hide);
     } else {
-      d3.selectAll(".Area-layer").call(show)
+      d3.selectAll(".Area-layer").call(show);
       d3.selectAll(".Bar-layer").call(hide);
     }
     hideAxis();
@@ -647,8 +1044,17 @@ var scrollVis = function() {
    */
 
   function showDetails(backwards = false) {
-    d3.selectAll(".Area-layer").call(hide);
-    hideAxis();
+    if (backwards) {
+      d3.selectAll(".Detail-layer").call(show);
+    } else { 
+ d3.selectAll(".Area-layer").call(hide);
+ hideAxis();
+     d3.selectAll(".Detail-layer").call(show);
+    }
+   
+   
+    
+    
   }
 
   /**
@@ -662,7 +1068,8 @@ var scrollVis = function() {
    */
   function showFinal(backwards = false) {
     // ensure the axis to areasogram one
-d3.selectAll(".Area-layer").call(hide);
+    
+    d3.selectAll(".Detail-layer").call(hide);
     hideAxis();
   }
 
@@ -753,8 +1160,8 @@ d3.selectAll(".Area-layer").call(hide);
   };
 
   // return chart function
-  return chart;
-};
+return chart;}
+
 
 /**
  * display - called once data
@@ -782,14 +1189,14 @@ function display(rawD) {
   scroll.on("active", function(index) {
     d3.selectAll(".step")
       .style("opacity", function(d, i) {
-        return i === index ? 1 : 0.1;
+        return i === index ? 1 : 0.5;
       })
       .classed("activate", function(d, i) {
         return i === index ? true : false;
       });
     d3.selectAll(".counter")
       .style("opacity", function(d, i) {
-        return i === index ? 1 : 0.1;
+        return i === index ? 1 : 0.5;
       })
       .classed("activate", function(d, i) {
         return i === index ? true : false;
@@ -805,4 +1212,4 @@ function display(rawD) {
 }
 
 // load data and display
-display(dummy);
+display([]);
