@@ -126,12 +126,12 @@ section {
 
 .activate{
     color: antiquewhite;
-    animation: activate 15s linear
+    animation: activate 80s linear
 }
 .Connections-layer[class=reveal]>.routes {
     stroke-dasharray: 1000;
     stroke-dashoffset: 1000;
-    animation: dash 20s linear alternate infinite;
+    animation: dash 100s linear alternate infinite;
 }
 .sticky,
 .Detail-title
