@@ -164,7 +164,7 @@ from{
 
 }
 
-test{
+.y,.x{
     color: white;
     opacity: 1;
     fill: #fff;
