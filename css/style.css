@@ -167,6 +167,7 @@ from{
 test{
     color: white;
     opacity: 1;
+    fill: #fff;
 }
 #Final{
    height:50px;
