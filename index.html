@@ -17,71 +17,180 @@
         <script src="lib/mapdata.js"></script>
         <script src="helper/related.js"></script>
         <script src="helper/dataprepare.js"></script>
-        
+
     </head>
 
     <body>
-    
-    <svg xmlns="http://www.w3.org/2000/svg" style="display:none;">
 
-        <symbol id="pinpoints">
-            <path
-                d="m21.38006,3.5c-7.11323,0 -12.88006,5.76683 -12.88006,12.88006c0,7.11494 12.88006,31.11994 12.88006,31.11994s12.88006,-24.005 12.88006,-31.11994c0,-7.11323 -5.76511,-12.88006 -12.88006,-12.88006zm0,19.03501c-3.39862,0 -6.15495,-2.75462 -6.15495,-6.15495s2.75633,-6.15495 6.15495,-6.15495s6.15495,2.75633 6.15495,6.15495s-2.75633,6.15495 -6.15495,6.15495z" />
-        </symbol>
-    </svg>
-    
-    <nav class="navigation">    
-        <a href="#Intro" class="navigation-item counter">Intro</a>
-        <a href="#EnterMap" class="navigation-item counter">EnterMap</a>
-        <a href="#showPoints" class="navigation-item counter ">showPoints</a>
-        <a href="#showPoints2" class="navigation-item counter">showPoints2</a>
-        <a href="#Connection" class="navigation-item counter">Connection</a>
-        <a href="#TopTerriost" class="navigation-item counter">TopTerriost</a>
-        <a href="#showArea" class="navigation-item counter">showArea</a>
-        <a href="#Details" class="navigation-item counter">Details</a>
-        <a href="#Final" class="navigation-item counter">End</a>
-    </nav>
+        <svg xmlns="http://www.w3.org/2000/svg" style="display:none;">
+
+            <symbol id="pinpoints">
+                <path
+                    d="m21.38006,3.5c-7.11323,0 -12.88006,5.76683 -12.88006,12.88006c0,7.11494 12.88006,31.11994 12.88006,31.11994s12.88006,-24.005 12.88006,-31.11994c0,-7.11323 -5.76511,-12.88006 -12.88006,-12.88006zm0,19.03501c-3.39862,0 -6.15495,-2.75462 -6.15495,-6.15495s2.75633,-6.15495 6.15495,-6.15495s6.15495,2.75633 6.15495,6.15495s-2.75633,6.15495 -6.15495,6.15495z" />
+            </symbol>
+        </svg>
+
+        <nav class="navigation">
+            <a href="#Intro" class="navigation-item counter">Start</a>
+            <a href="#EnterMap" class="navigation-item counter"></a>
+            <a href="#showPoints" class="navigation-item counter "></a>
+            <a href="#showPoints2" class="navigation-item counter"></a>
+            <a href="#Connection" class="navigation-item counter">Connection of attacks</a>
+            <a href="#TopTerriost" class="navigation-item counter">Top Terrorist</a>
+            <a href="#showArea" class="navigation-item counter">People involved</a>
+            <a href="#Details" class="navigation-item counter">Details</a>
+            <a href="#Final" class="navigation-item counter">End</a>
+        </nav>
         <div class="container">
-            
+
             <div id='graphic'>
                 <div id='sections' class=".section-wrapper">
                     <section class="step intro" id="Intro">
                         <div class="section-title counter">Terriost Acctack</div>
-                        Welcome analog
+                        Worldwide terrism
+
+                        <p class="welcome" id="wel"> Welcome to our website </p>
+                        <p class="welpage" id="wel2">
+                            Our website is focusing on the terrorist that happened around the world from <b>1970 -
+                                2017
+                                We will introduce the worldwide terrorist that happened during this period in various
+                                graph.
+                                <br />
+                                The definition given by the researchers of terrorism is:
+                                "The threatened or actual use of illegal force and violence by a non-state actor to
+                                attain a
+                                political, economic, religious, or social goal through fear, coercion, or intimidation."
+                        </p>
+                        <p class="rightg"> The blank space on the right hand side will show you the graphs. </p>
                     </section>
                     <section class="step entermap" id="EnterMap">
                         <div class="section-title counter">Enter the map</div>
-                        enter the map
+                        A worldwide Map shows the times of terrism
+                        <p class="mapintro1">
+                            Now there is a map on the right, combined with a heat map, shows you the countries that have
+                            experienced the most terrorist attacks.<br />
+                            Red colour represent the most times, and the lighter colour means less attacks had ever
+                            happened.<br />
+                            Sadly, we found that actually most of the coutries had happened terrism regardless how many
+                            times
+                            that ever happened. Though the truth is stunning, but it also gives us an alert.
+                        </p>
                     </section>
                     <section class="step showpoints" id="showPoints">
                         <div class="section-title counter">Top countries</div>
-                        show top countries
+                        The top countries
+                        <p class="mapintro2">
+                            Besides showing you the countries, the indicators now point at each country on the map shows
+                            you the
+                            exact places that happened the most times of attacks.<br \>
+                            They are:
+                            <font color="grey"><b>Iraq</b>, <b class="countryb">Afghanistan</b>, <b
+                                    class="countryb">Yeman</b>,
+                                <b>Somalia</b>, <b>United Kingdom</b>, <b>India</b></font>, and others. </p>
+
                     </section>
                     <section class="step showpoints2" id="showPoints2">
                         <div class="section-title counter">Top countries</div>
                         show top countries
+                        <p class="mapintro2">
+                            Besides showing you the countries, the indicators now point at each country on the map shows
+                            you the
+                            exact places that happened the most times of attacks.<br \>
+                            They are:
+                            <font color="grey"><b>Iraq</b>, <b class="countryb">Afghanistan</b>, <b
+                                    class="countryb">Yeman</b>,
+                                <b>Somalia</b>, <b>United Kingdom</b>, <b>India</b></font>, and others. </p>
+
                     </section>
                     <section class="step connection" id="Connection">
                         <div class="section-title counter">How attacks related</div>
-                        show relation
+                        Map that shows the relations
+                        <p class="mapintro3">
+                            Now as you can see, there are several lines in the map which point to each other. <br />
+                            These line indicates the relation between those attacks. Some of the attacks caused by the
+                            same
+                            group of people that move around in different areas. <br />
+                            From the map, we may get a basic ideas which areas are most dangerous.
+                            Here is a center point that basiclly point to all the
+                            other attacks. </p>
+
                     </section>
                     <section class="step topterriost" id="TopTerriost">
-                        <div class="section-title counter">Top Terriost</div>
-                        Top Terriost
+                        <div class="section-title counter">Top Terrorist </div>
+                        Top Terrorist
+                        <p class="barintro3">
+                            Now the Horizontal bar chart on the right, shows the top terrorist that attack the most of
+                            times.
+                            <br />
+                            The top one is <font color="grey"><b><i>Islamic state of Iraq and the Levant(ISIL)</i></b>
+                            </font>,
+                            <br />the second is <font color="grey"><b><i>AI-Qaida in the Arabian
+                                        Peninsula(AQAP),</i></b></font>
+                            <br />third one is <font color="grey"><b><i>AI-Shabaab</i></b></font>.
+                            <br />This graph give us the knowledge which group should be the most concern to the whole
+                            world.
+                        </p>
                     </section>
                     <section class="step showArea" id="showArea">
-                        <div class="section-title counter">showArea</div>
-                        showArea Maps
+                        <div class="section-title counter">Take a closer Look Number of injured, Killed or Kidnapped</div>
+                        
+                        <p class="areaintro">
+                            Afghanistan (افغانستان), officially the Islamic Republic of Afghanistan, is a landlocked
+                            country
+                            located in South-Central Asia. 
+
+
+                            
+                           The graph shows the relative poportion of people who got Murderd, 
+                           Kidnapped, or Injured, during Terriost Attacks.
+                           From the graphs.
+
+
+                        
+                        
+                        </p>
                     </section>
                     <section class="step details" id="Details">
-                        <div class="section-title counter">Details</div>
-                        Countries details
+                        <div class="section-title counter">Attacks Summaries</div>
+                       
+                        <p class="country">
+                          
+                            <br /><br />
+                            <font size="4" color="#E6E6FA"><b></b></font><br />
+                            
+                            
+                            Now lets look at all the attacks happed in Afghanistan.
+                            The upper bars show the successful attacks while the bars at the lower layer shows unsuccessful attacks.
+                            Area in the central panel shows total attacks happening during all these years. Clearly theres a rising trend of Attacks.
+                            Try to move the central brush and see how Success rate change in months, or in years.
+
+                           
+                        </p>
+                                 
                     </section>
                     <section class="step final" id="Final">
-                        <div class="section-title counter">Final</div>
-                        blahblah
-                    </section>
+                       </section>
                 </div>
+                <div class="section-title counter"></div>
+                THANK YOU FOR YOUR PRECISE TIME
+                
+                <p class="endword">
+                    <font color="#6495ED" face="Times New Roman"><b>First of all, thank you for viewing our
+                            website.</b>
+                
+                        What we have till now is only part of this topic. We are not trying our best to spread the idea of Peace 
+                       <br />
+                        Peace is what the world needed. In
+                        the name of peace, we should be all <font color="green"><b>united!</b></font>
+                        Let's all make our world a safer world!
+                </p>
+                </div>
+                </div>
+
+
+
+
+
                 <div id='vis'>
                 </div>
                 <div id="extra-space">
@@ -90,13 +199,13 @@
         </div>
 
 
-        
-        <script src="tilechart.js"></script>
-    <script src="lib/jquery3.3.1.min.js"></script>
-       <script src="lib/jquery.smoothscroll.min.js"></script>
+
+
+        <script src="lib/jquery3.3.1.min.js"></script>
+
         <script src="helper/scorll.js"></script>
         <script src="helper/controller.js"></script>
-         
+
         <script src="eventlistener.js"></script>
     </body>
 

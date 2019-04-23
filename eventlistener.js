@@ -41,6 +41,8 @@
         $('body').find("p.tooltip-active").delay(200).remove();
       });
 
+    
+
     window.onscroll = function () {
       scrollsticky();
     };
