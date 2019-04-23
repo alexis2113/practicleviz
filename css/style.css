@@ -170,7 +170,7 @@ text{
     opacity: 1;
     fill: #fff !important;
 }
-#Final{
-   height:50px;
+.points{
+   z-index: 999;
 
 }
