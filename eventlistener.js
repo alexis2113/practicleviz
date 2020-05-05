@@ -51,13 +51,18 @@
     var sticky = header.offsetTop;
 
     function scrollsticky() {
-      if (window.pageYOffset > sticky ){
-    console.log(window.pageYOffset);
-    header.addClass("sticky");
-  } else {
-    header.removeClass("sticky");
-  }
-}
+      if (window.pageYOffset > sticky) {
+        console.log(window.pageYOffset);
+        header.addClass("sticky");
+      } else {
+        header.removeClass("sticky");
+        
+      }
+    }
+
+      
+  })
+})
 
 
 
@@ -67,5 +72,5 @@
 
 
 
-  })
-})();
+  
+();
